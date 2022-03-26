@@ -35,7 +35,7 @@ $router->group(['prefix' => 'comments'], function ($router) {
     ]);
 });
 $router->group(['prefix' => 'characters'], function ($router) {
-    $router->get('/', [
+    $router->post('/', [
         'as' => 'characters', 'uses' => 'CharactersController@get'
     ]);
     $router->get('/{id}', [

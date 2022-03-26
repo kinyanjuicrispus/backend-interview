@@ -33,7 +33,7 @@ class BooksController extends BaseController
             }
             $data = json_decode($response->getBody());
 
-            usort($data, "cmp");
+            usort($data, "release_sort");
 
         if (count($data) == 0) {
             return response()->json([
