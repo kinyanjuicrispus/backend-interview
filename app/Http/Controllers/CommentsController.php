@@ -18,16 +18,18 @@ class CommentsController extends BaseController
 
     public function getAll()
     {
-        $data = $this->model::all();
+        $data = $this->model::orderBy('created_at', 'DESC')->get();
 
         if (count($data) == 0) {
             return response()->json([
+                'success' => false,
                 'message' => 'data not found',
                 'data' => $data
             ])->setStatusCode(404);
         }
 
         return response()->json([
+            'success' => true,
             'message' => 'Success',
             'data' => $data
         ])->setStatusCode(200);
@@ -41,12 +43,14 @@ class CommentsController extends BaseController
 
         if (count($data) == 0) {
             return response()->json([
+                'success' => false,
                 'message' => 'data not found',
                 'data' => $data
             ])->setStatusCode(404);
         }
 
         return response()->json([
+            'success' => true,
             'message' => 'Success',
             'data' => $data
         ])->setStatusCode(200);
@@ -61,7 +65,7 @@ class CommentsController extends BaseController
             'book_isbn',
             'ip_address'
         );
-        // validate your input
+         // validate your input
 
         $this->validate($req, $this->modelClass->validation);
 
@@ -70,9 +74,10 @@ class CommentsController extends BaseController
         $data->fill($formData);
         $data->save();
         return response()->json([
-            'message' => 'Success',
+            'success' => true,
+            'message' => 'Comment added successfully',
             'data' => $data
-        ])->setStatusCode(200);
+        ])->setStatusCode(201);
     }
 
     public function put(Request $req, $id)
@@ -82,6 +87,7 @@ class CommentsController extends BaseController
 
         if (!$data) {
             return response()->json([
+                'success' => false,
                 'message' => 'data not found',
                 'data' => $data
             ])->setStatusCode(404);
@@ -95,6 +101,7 @@ class CommentsController extends BaseController
         // validate your input
 
         $this->validate($req, $this->modelClass->validation);
+
         $data['comment'] = $formData['comment'];
         $data['book_isbn'] = $formData['book_isbn'];
         $data['ip_address'] = $formData['ip_address'];
@@ -102,6 +109,7 @@ class CommentsController extends BaseController
         $data->save();
 
         return response()->json([
+            'success' => true,
             'message' => 'Success',
             'data' => $data
         ])->setStatusCode(200);
@@ -114,12 +122,14 @@ class CommentsController extends BaseController
 
         if (!$data) {
             return response()->json([
+                'success' => false,
                 'message' => 'data not found',
                 'data' => $data
             ])->setStatusCode(404);
         }
         $data->delete();
         return response()->json([
+            'success' => true,
             'message' => 'comment has been deleted successfully',
             'data' => $data
         ])->setStatusCode(200);

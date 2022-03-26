@@ -13,7 +13,7 @@ class Comment extends Model
     ];
 
     public $validation = [
-        'comment' => 'required',
+        'comment' => 'required|max:500',
         'ip_address' => 'required',
         'book_isbn' => 'required'
     ];

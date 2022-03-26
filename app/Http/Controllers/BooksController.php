@@ -24,11 +24,20 @@ class BooksController extends BaseController
     {
         try {
             $response = $this->client->request('GET', 'books');
+            if($response->getStatusCode() != 200){
+                return response()->json([
+                    'success'=> false,
+                    'message' => 'An error occurred',
+                    'data' => null
+                ])->setStatusCode(500);
+            }
             $data = json_decode($response->getBody());
 
             usort($data, "cmp");
+
         if (count($data) == 0) {
             return response()->json([
+                'success'=> false,
                 'message' => 'data not found',
                 'data' => $data
             ])->setStatusCode(404);
@@ -37,15 +46,18 @@ class BooksController extends BaseController
         foreach ($data as $datum){
             $commentCount = Comment::where('book_isbn',$datum->isbn)->count();
             $datum->commentCount = $commentCount;
-            array_push($booksWithCommentCount, $datum);
+            $booksWithCommentCount[] = $datum;
         }
 
             return response()->json([
+                'success'=> true,
                 'message' => 'Success',
                 'data' => $booksWithCommentCount
             ])->setStatusCode(200);
+
         } catch (GuzzleException $e) {
             return response()->json([
+                'success'=> false,
                 'message' => 'An error occurred',
                 'data' => null
             ])->setStatusCode(500);
@@ -58,10 +70,17 @@ class BooksController extends BaseController
     {
         try {
             $response = $this->client->request('GET', 'books/' . $id);
-
-            $data = json_decode($response->getBody()->getContents(), true, JSON_UNESCAPED_SLASHES);
+            if($response->getStatusCode() != 200){
+                return response()->json([
+                    'success'=> false,
+                    'message' => 'An error occurred',
+                    'data' => null
+                ])->setStatusCode(500);
+            }
+            $data = json_decode($response->getBody());
 
             return response()->json([
+                'success'=> true,
                 'message' => 'Success',
                 'data' => $data
             ])->setStatusCode(200);
