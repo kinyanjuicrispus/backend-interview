@@ -28,7 +28,6 @@ $app = new Laravel\Lumen\Application(
 
  $app->withEloquent();
 
-$app->configure('swagger-lume');
 
 /*
 |--------------------------------------------------------------------------
@@ -63,7 +62,7 @@ $app->singleton(
 */
 
 $app->configure('app');
-
+$app->configure('api-config');
 /*
 |--------------------------------------------------------------------------
 | Register Middleware
@@ -93,7 +92,6 @@ $app->configure('app');
 | totally optional, so you are not required to uncomment this line.
 |
 */
-$app->register(\SwaggerLume\ServiceProvider::class);
 // $app->register(App\Providers\AppServiceProvider::class);
 // $app->register(App\Providers\AuthServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);

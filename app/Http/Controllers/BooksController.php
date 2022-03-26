@@ -2,127 +2,75 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Book;
-use Illuminate\Http\Request;
+use App\Models\Comment;
+use GuzzleHttp\Exception\GuzzleException;
 use Laravel\Lumen\Routing\Controller as BaseController;
+use GuzzleHttp\Client;
 
 class BooksController extends BaseController
 {
-    public $model = Book::class;
-    public $modelClass;
+    private $base_api_url;
+    private $client;
 
-    public function __construct()
-    {
-        $this->modelClass = new Book();
+    public function __construct() {
+        $this -> base_api_url  = config('api-config.base_api_url');
+        $this -> client = new Client([
+            'base_uri' => $this->base_api_url
+        ]);
     }
+
 
     public function get()
     {
-        $data = $this->model::
-        with(['Author', 'Author'])
-            ->withCount(['Comments', 'Comments'])
-            ->get();
+        try {
+            $response = $this->client->request('GET', 'books');
+            $data = json_decode($response->getBody());
 
+            usort($data, "cmp");
         if (count($data) == 0) {
             return response()->json([
                 'message' => 'data not found',
                 'data' => $data
             ])->setStatusCode(404);
         }
+        $booksWithCommentCount = array();
+        foreach ($data as $datum){
+            $commentCount = Comment::where('book_isbn',$datum->isbn)->count();
+            $datum->commentCount = $commentCount;
+            array_push($booksWithCommentCount, $datum);
+        }
 
-        return response()->json([
-            'message' => 'Success',
-            'data' => $data
-        ])->setStatusCode(200);
+            return response()->json([
+                'message' => 'Success',
+                'data' => $booksWithCommentCount
+            ])->setStatusCode(200);
+        } catch (GuzzleException $e) {
+            return response()->json([
+                'message' => 'An error occurred',
+                'data' => null
+            ])->setStatusCode(500);
+        }
+
     }
+
 
     public function getBookById($id)
     {
-        $data = $this->model::
-        with(['Author', 'Author'])
-            ->withCount(['Comments', 'Comments'])
-            ->find($id);
-        if (!$data) {
+        try {
+            $response = $this->client->request('GET', 'books/' . $id);
+
+            $data = json_decode($response->getBody()->getContents(), true, JSON_UNESCAPED_SLASHES);
+
             return response()->json([
-                'message' => 'data not found',
+                'message' => 'Success',
                 'data' => $data
-            ])->setStatusCode(404);
-        }
-
-        return response()->json([
-            'message' => 'Success',
-            'data' => $data
-        ])->setStatusCode(200);
-    }
-
-    public function post(Request $req)
-    {
-        $formData = $req->only(
-            'title',
-            'author_id'
-        );
-        // validate your input
-
-        $this->validate($req, $this->modelClass->validation);
-
-        // try to insert
-        $data = $this->modelClass;
-        $data->fill($formData);
-        $data->save();
-        return response()->json([
-            'message' => 'Success',
-            'data' => $data
-        ])->setStatusCode(200);
-    }
-
-    public function put(Request $req, $id)
-    {
-        $data = $this->model::find($id);
-        // update the model
-
-        if (!$data) {
+            ])->setStatusCode(200);
+        } catch (GuzzleException $e) {
             return response()->json([
-                'message' => 'data not found',
-                'data' => $data
-            ])->setStatusCode(404);
+                'message' => 'An error occurred',
+                'data' => null
+            ])->setStatusCode(500);
         }
-
-        $formData = $req->only(
-            'title',
-            'author_id'
-        );
-        // validate your input
-
-        $this->validate($req, $this->modelClass->validation);
-        $data['title'] = $formData['title'];
-        $data['author_id'] = $formData['author_id'];
-        // save to db
-        $data->save();
-
-        return response()->json([
-            'message' => 'Success',
-            'data' => $data
-        ])->setStatusCode(200);
     }
-
-    public function delete($id)
-    {
-        $data = $this->model::find($id);
-        // update the model
-
-        if (!$data) {
-            return response()->json([
-                'message' => 'data not found',
-                'data' => $data
-            ])->setStatusCode(404);
-        }
-        $data->delete();
-        return response()->json([
-            'message' => 'data has been successfully',
-            'data' => $data
-        ])->setStatusCode(200);
-
-    }
-
 
 }

@@ -2,61 +2,71 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Character;
-use Illuminate\Http\Request;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 
 class CharactersController extends Controller
 {
-    public $model = Character::class;
-    public $modelClass;
+    private $base_api_url;
+    private $client;
 
-    public function __construct()
-    {
-        $this->modelClass = new Character();
+    public function __construct() {
+        $this -> base_api_url  = config('api-config.base_api_url');
+        $this -> client = new Client([
+            'base_uri' => $this->base_api_url
+        ]);
     }
 
-    public function getCharacterByBookId($id)
+
+    public function get()
     {
+        try {
+            $response = $this->client->request('GET', 'characters');
+            $data = json_decode($response->getBody()->getContents(),true, JSON_UNESCAPED_SLASHES);
 
-        $characters = Character::where(['book_id' => $id])
+            if (count($data) == 0) {
+                return response()->json([
+                    'message' => 'data not found',
+                    'data' => $data
+                ])->setStatusCode(404);
+            }
 
-            ->get();
-
-        if (count($characters) == 0) {
             return response()->json([
-                'message' => 'data not found',
-                'data' => $characters
-            ])->setStatusCode(404);
+                'message' => 'Success',
+                'data' => $data
+            ])->setStatusCode(200);
+        } catch (GuzzleException $e) {
+            return response()->json([
+                'message' => 'Failed',
+                'data' => null
+            ])->setStatusCode(500);
         }
 
-        return response()->json([
-            'message' => 'Success',
-            'data' => $characters
-        ])->setStatusCode(200);
-
     }
 
-    public function post(Request $req)
+    public function getCharacterById($id)
     {
-        $formData = $req->only(
-            'character_name',
-            'book_id'
-        );
-        // validate your input
+        try {
+            $response = $this->client->request('GET', 'characters' . $id);
+            $data = json_decode($response->getBody()->getContents(), true, JSON_UNESCAPED_SLASHES);
 
-        $this->validate($req, $this->modelClass->validation);
+//            if (count($data) == 0) {
+//                return response()->json([
+//                    'message' => 'data not found',
+//                    'data' => $data
+//                ])->setStatusCode(404);
+//            }
 
-        // try to insert
-        $data = $this->modelClass;
-        $data->fill($formData);
-        $data->save();
-        return response()->json([
-            'message' => 'Success',
-            'data' => $data
-        ])->setStatusCode(200);
+            return response()->json([
+                'message' => 'Success',
+                'data' => $data
+            ])->setStatusCode(200);
+        } catch (GuzzleException $e) {
+            return response()->json([
+                'message' => 'Failed',
+                'data' => null
+            ])->setStatusCode(500);
+        }
     }
-
-
-
 
 }
