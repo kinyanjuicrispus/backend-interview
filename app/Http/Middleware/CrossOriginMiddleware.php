@@ -14,7 +14,7 @@ class CrossOriginMiddleware
 
         $headers = [
             'Access-Control-Max-Age'           => '86400',
-            'Access-Control-Allow-Origin'      => ['*'],
+            'Access-Control-Allow-Origin'      => '*',
             'Access-Control-Allow-Methods'     => 'POST, GET, OPTIONS, PUT, DELETE',
             'Access-Control-Allow-Credentials' => '',
             'Access-Control-Allow-Headers'     => 'Content-Type, Authorization, X-Requested-With, sentry-trace'
