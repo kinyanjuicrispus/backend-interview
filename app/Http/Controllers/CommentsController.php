@@ -80,41 +80,6 @@ class CommentsController extends BaseController
         ])->setStatusCode(201);
     }
 
-    public function put(Request $req, $id)
-    {
-        $data = $this->model::find($id);
-        // update the model
-
-        if (!$data) {
-            return response()->json([
-                'success' => false,
-                'message' => 'data not found',
-                'data' => $data
-            ])->setStatusCode(404);
-        }
-        $formData = $req->only(
-            'comment',
-            'book_isbn',
-            'ip_address'
-        );
-
-        // validate your input
-
-        $this->validate($req, $this->modelClass->validation);
-
-        $data['comment'] = $formData['comment'];
-        $data['book_isbn'] = $formData['book_isbn'];
-        $data['ip_address'] = $formData['ip_address'];
-        // save to db
-        $data->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Success',
-            'data' => $data
-        ])->setStatusCode(200);
-    }
-
     public function delete($id)
     {
         $data = $this->model::find($id);
