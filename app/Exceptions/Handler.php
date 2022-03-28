@@ -56,12 +56,12 @@ class Handler extends ExceptionHandler
                 'error' => 404
             ], 404);
         }
-//        if ($exception instanceof \Exception) {
-//            return response([
-//                'message' => 'Server error occurred, please try again',
-//                'error' => 500
-//            ], 500);
-//        }
+        if ($exception instanceof \Exception) {
+            return response([
+                'message' => 'Server error occurred, please try again',
+                'error' => 500
+            ], 500);
+        }
         return parent::render($request, $exception);
     }
 }
