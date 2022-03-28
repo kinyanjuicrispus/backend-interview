@@ -39,7 +39,7 @@ class CommentsController extends BaseController
 
     public function get($id)
     {
-        $data = $this->model::where(['book_isbn' => $id])->get();
+        $data = $this->model::where(['id' => $id])->get();
 
         if (count($data) == 0) {
             return response()->json([
